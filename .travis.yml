@@ -1,0 +1,11 @@
+language: node_js
+ node_js: node
+ services:
+     - mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: MRvc76EfafPo37BFNq7ODMQnZwqJhE+1Z6ms+Bn/yJdsubvxWPgivPqgoK9FPFN0XeL+ImAY0UFzvwrpEt3zTCjhcVOCDUH6GMbDJKix+DbToiEiOLOmlxS9Qdu2IMOdewOIlxi58ynKvvPd4jClU3ilVGCVyoq+30GC0zxB+2EzhMtiruAT7nYvkf1W3v2hxLBNCbN3yBi9sGrn3VY+8/vKTcKyUtVCq7Pm+ibL6AAZt7vxJqkM+kfcBTUxu8nevN3jXI9Fv3NS2cf5t+IJQ4pMeBK/HhOihKU4SEHBYA0Rr+RW97PX1LQdiSCgbqyZ1GkY7TAdCK1cuRXWYLpMa5Vw/eMlkSG+NV/phpvGZcNqnM9XIBIMtHqcKKuOs21gGExDaTuTSGTLIv/CR5df4uqSrVaEl0eRDX30ZnfxqmarztCTfvKrGbB0eZjODI149/RO5GNHG8bCCb5Dl9aWeAEJx0FyGLfTaW6BIQH6by+Ot9TWpbi2gFl+5COhdf7X0aRPelxOdzYVkI0Mu/snBdUgIPL195ypnUTTM57qtU9M/9tJESm9xfTYdh9hpXFwaAoU2mLQZZAczKAEO0zuhGf74BI6UDkdywHnjtCVTP6MURs8JRUeVwRFI7T+c+LPoob8gi73GK+jBkUG4jK1n+TfL/RoGoMl1fMF1x8tb5s=
+  app: gentle-taiga-62884
+  on:
+    repo: mosef/typequick-api
