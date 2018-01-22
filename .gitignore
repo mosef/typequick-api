@@ -23,11 +23,6 @@ yarn-error.log*
 # dependencies
 /node_modules
 
-# testing
-/coverage
-/tests
-/test
-
 # production
 /build
 
