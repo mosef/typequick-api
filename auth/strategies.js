@@ -1,50 +1,26 @@
-'use strict';
-const { Strategy: LocalStrategy } = require('passport-local');
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const User = require('../models/user');
+const config = require('../config');
 
-const { User } = require('../models/user');
-
-const { JWT_SECRET } = require('../config');
-
-const localStrategy = new LocalStrategy((email, password, callback) => {
-  let user;
-  User.findOne({ email: email })
-  .then(_user => {
-    user = _user;
-    if (!user) {
-      return Promise.reject({
-        reason: 'LoginError',
-        message: 'Incorrect email or password'
-      });
-    }
-    return user.validatePassword(password);
-  })
-  .then(isValid => {
-    if (!isValid) {
-      return Promise.reject({
-        reason: 'LoginError',
-        message: 'Incorrect email or password'
-      });
-    }
-    return callback(null, user);
-  })
-  .catch(err => {
-    if (err.reason === 'LoginError') {
-      return callback(null, false, err);
-    }
-    return callback(err, false);
-  });
-});
-
-const jwtStrategy = new JwtStrategy(
-  {
-  secretOrKey: JWT_SECRET,
-  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
-  algorithms: ['HS256']
-  },
-  (payload, done) => {
-    done(null, payload.user);
-  }
-);
-
-module.exports = { localStrategy, jwtStrategy };
+module.exports = (passport) => {
+  const opts = {};
+  opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('Bearer');
+  opts.secretOrKey = config.JWT_SECRET;
+  passport.use(new JwtStrategy(opts, (jwtPayload, done) => {
+      User.findById(jwtPayload._id)
+          .then((user) => {
+              if (user) {
+                  const userData = {
+                      _id: user._id,
+                      email: user.email,
+                      username: user.username,
+                  };
+                  done(null, userData);
+              } else {
+                  done(null, false);
+              }
+          })
+          .catch(error => done(error, false));
+  }));
+};

@@ -1,19 +1,21 @@
+require('dotenv').config();
+
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
-const { router: usersRouter } = require('./auth');
-const { router: authRouter, localStrategy, jwtStrategy } = require('./models');
-
-mongoose.Promise = global.Promise;
+const { PORT, DATABASE_URL } = require('./config');
+const { router: userRouter } = require('./routes/users.router');
 
 const app = express();
 
-app.use(morgan('common'));
-app.use(bodyParser.json());
+mongoose.Promise = global.Promise;
 
+//logging
+app.use(morgan('common'));
+
+//CORS
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -24,19 +26,11 @@ app.use(function (req, res, next) {
   next();
 });
 
-passport.use(localStrategy);
-passport.use(jwtStrategy);
+//parser
+app.use(bodyParser.json());
 
-app.use('/api/users/', usersRouter);
-app.use('/api/auth/', authRouter);
-
-const jwtAuth = passport.authenticate('jwt', { session: false });
-
-app.get('/api/protected', jwtAuth, (req, res) => {
-  return res.json({
-    data: 'rosebud'
-  });
-});
+//routes
+app.use('/api/users/', userRouter);
 
 app.use('*', (req, res) => {
   return res.status(404).json({ message: 'Not Found' });

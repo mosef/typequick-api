@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
-mongoose.Promise = global.Promise;
-
-const UserSchema = mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -20,21 +18,21 @@ const UserSchema = mongoose.Schema({
   }
 });
 
-UserSchema.methods.serialize = function() {
-  return {
-    email: this.email || '',
-    username: this.username || ''
-  };
-};
+UserSchema.pre('save', function userPreSave(next) {
+  const user = this;
+  if (this.isModified('password') || this.isNew) {
+      return bcrypt.hash(user.password, 10)
+          .then((hash) => {
+              user.password = hash;
+              return next();
+          })
+          .catch(err => next(err));
+  }
+  return next();
+});
 
-UserSchema.methods.validatePassword = function(password) {
+UserSchema.methods.comparePassword = function userComparePassword(password) {
   return bcrypt.compare(password, this.password);
 };
 
-UserSchema.statics.hashPassword = function(password) {
-  return bcrypt.hash(password, 10);
-};
-
-const User = mongoose.model('User', UserSchema);
-
-module.exports = {User};
+module.exports = mongoose.model('User', UserSchema);

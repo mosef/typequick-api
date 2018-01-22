@@ -26,6 +26,7 @@ yarn-error.log*
 # testing
 /coverage
 /tests
+/test
 
 # production
 /build

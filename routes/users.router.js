@@ -1,121 +1,82 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const {User} = require('../models/user');
+const passport = require('passport');
+const User  = require('../models/user');
+const jwt = require('jsonwebtoken');
+const config = require('../config');
+const disableWithToken = require('../middleware/disableWithToken.middleware').disableWithToken;
+const requiredFields = require('../middleware/requiredFields.middleware');
+
+require('../auth/strategies')(passport);
 const router = express.Router();
-const jsonParser = bodyParser.json();
 
-router.post('/', jsonParser, (req, res) => {
-  const requiredFields = ['email', 'password'];
-  const missingField = requiredFields.find(field => !(field in req.body));
-
-  if (missingField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Missing field',
-      location: missingField
-    });
-  }
-
-  const stringFields = ['email', 'password', 'username'];
-  const nonStringField = stringFields.find(
-    field => field in req.body && typeof req.body[field] !== 'string'
-  );
-
-  if (nonStringField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Incorrect field type: expected string',
-      location: nonStringField
-    });
-  }
-
-  const explicityTrimmedFields = ['email', 'password'];
-  const nonTrimmedField = explicityTrimmedFields.find(
-    field => req.body[field].trim() !== req.body[field]
-  );
-
-  if (nonTrimmedField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Cannot start or end with whitespace',
-      location: nonTrimmedField
-    });
-  }
-
-  const sizedFields = {
-    username: {
-      min: 1
-    },
-    password: {
-      min: 10,
-      max: 72
-    }
-  };
-  const tooSmallField = Object.keys(sizedFields).find(
-    field =>
-      'min' in sizedFields[field] &&
-            req.body[field].trim().length < sizedFields[field].min
-  );
-  const tooLargeField = Object.keys(sizedFields).find(
-    field =>
-      'max' in sizedFields[field] &&
-            req.body[field].trim().length > sizedFields[field].max
-  );
-
-  if (tooSmallField || tooLargeField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: tooSmallField
-        ? `Must be at least ${sizedFields[tooSmallField]
-          .min} characters long`
-        : `Must be at most ${sizedFields[tooLargeField]
-          .max} characters long`,
-      location: tooSmallField || tooLargeField
-    });
-  }
-
-  let {email, password, username = ''} = req.body;
-  username = username.trim();
-
-  return User.find({email})
-    .count()
-    .then(count => {
-      if (count > 0) {
-        return Promise.reject({
-          code: 422,
-          reason: 'ValidationError',
-          message: 'Email already in use',
-          location: 'email'
-        });
-      }
-      return User.hashPassword(password);
+router.route('/register')
+    .post(disableWithToken, requiredFields('email', 'username', 'password'), (req, res) => {
+        User.create({
+            email: req.body.email,
+            password: req.body.password,
+            username: req.body.username,
+        })
+        .then(() => res.status(201).send())
+        .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
     })
-    .then(hash => {
-      return User.create({
-        email,
-        password: hash,
-        uername
+    .get(passport.authenticate('jwt', { session: false }), (req, res) => {
+        res.status(200).json(req.user);
+});
+
+router.post('/login', disableWithToken, requiredFields('email', 'password'), (req, res) => {
+  User.findOne({ email: req.body.email })
+  .then((foundResult) => {
+      if (!foundResult) {
+          return res.status(400).json({
+              generalMessage: 'Email or password is incorrect',
+          });
+      }
+      return foundResult;
+  })
+  .then((foundUser) => {
+      foundUser.comparePassword(req.body.password)
+      .then((comparingResult) => {
+          if (!comparingResult) {
+              return res.status(400).json({
+                  generalMessage: 'Email or password is incorrect',
+              });
+          }
+          const tokenPayload = {
+              _id: foundUser._id,
+              email: foundUser.email,
+              username: foundUser.username,
+          };
+          const token = jwt.sign(tokenPayload, config.JWT_SECRET, {
+              expiresIn: config.JWT_EXPIRY,
+          });
+          return res.json({ token: `Bearer ${token}` });
       });
-    })
-    .then(user => {
-      return res.status(201).json(user.serialize());
-    })
-    .catch(err => {
-      if (err.reason === 'ValidationError') {
-        return res.status(err.code).json(err);
+  })
+  .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
+});
+
+router.post('/refresh', (req, res) => {
+    User.findOne({ email: req.body.email })
+  .then((foundResult) => {
+      if (!foundResult) {
+          return res.status(400).json({
+              generalMessage: 'No token found',
+          });
       }
-      res.status(500).json({code: 500, message: 'Internal server error'});
+      return foundResult;
+  })
+  .then((foundUser) => {
+    const tokenPayload = {
+        _id: foundUser._id,
+        email: foundUser.email,
+        username: foundUser.username,
+    };
+    const token = jwt.sign(tokenPayload, config.JWT_SECRET, {
+        expiresIn: config.JWT_EXPIRY,
     });
+    return res.json({ token: `Bearer ${token}` });
+  })
+  .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
 });
 
-router.get('/', (req, res) => {
-  return User.find()
-    .then(users => res.json(users.map(user => user.serialize())))
-    .catch(err => res.status(500).json({message: 'Internal server error'}));
-});
-
-module.exports = {router};
+module.exports = { router };
