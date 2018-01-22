@@ -1,0 +1,12 @@
+{
+  "lesson": {
+    "chapter": {
+      "difficulty": ["Basics"],
+      "page": {
+        "title": "Classes, Id's and lists",
+        "content":
+          " To make a div with a class simply type a period before the div's name. Exmaple: '.text-box' <div class='text-box'></div>"
+      }
+    }
+  }
+}
