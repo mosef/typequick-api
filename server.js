@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
-const { PORT, DATABASE_URL } = require('./config');
+const { PORT, TEST_DATABASE_URL } = require('./config');
 const { router: userRouter } = require('./routes/users.router');
 
 const app = express();
@@ -40,7 +40,7 @@ let server;
 
 function runServer() {
   return new Promise((resolve, reject) => {
-    mongoose.connect(DATABASE_URL, { useMongoClient: true }, err => {
+    mongoose.connect(TEST_DATABASE_URL, { useMongoClient: true }, err => {
       if (err) {
         return reject(err);
       }
