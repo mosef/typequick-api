@@ -71,7 +71,13 @@ describe('Returning data from Database', function() {
           expect(data).to.have.status(200);
           expect(data).to.be.an('object');
           expect(data).to.be.lengthOf(1);
-      })
+      }).catch(err => {
+        if(err instanceof chai.AssertionError) {
+          throw err;
+        }
+        const res= err.response;
+        expect(res).to.have.status(400)
+      });
     });
   })
 });
