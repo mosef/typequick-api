@@ -1,6 +1,5 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const faker = require('faker');
 const expect = chai.expect
 
 const { app, runServer, closeServer } = require('../server');
@@ -73,7 +72,6 @@ describe('Returning data from Database', function() {
           expect(data).to.be.an('object');
           expect(data).to.be.lengthOf(1);
       })
-      return console.log("...........")
     });
   })
 });
