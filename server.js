@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const passport = require('passport');
 const { PORT, TEST_DATABASE_URL } = require('./config');
 const { router: userRouter } = require('./routes/users.router');
+const { router: lessonRouter } = require('./routes/lessons.router');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(bodyParser.json());
 
 //routes
 app.use('/api/users/', userRouter);
+app.use('/api/lessons/', lessonRouter);
 
 app.use('*', (req, res) => {
   return res.status(404).json({ message: 'Not Found' });
