@@ -1,7 +1,6 @@
 const express = require('express');
 const passport = require('passport');
-const Lesson  = require('../models/lesson');
-const { TEST_DATABASE_URL } = require('../config');
+const {Lesson}  = require('../models/lesson');
 
 require('../auth/strategies')(passport);
 const router = express.Router();
