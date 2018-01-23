@@ -7,9 +7,9 @@ const router = express.Router();
 
 router.get("/GET", passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Lesson.findOne({ chapter })
+    Lesson.find({})
       .then(lesson => {
-        res.status(200).json({ lessons });
+        res.status(200).json({ lesson });
       })
       .catch(err => {
         res.status(400).json({ error: "something went terribly wrong" });
