@@ -9,7 +9,7 @@ const { createNewUser, seedDb, teardownDb } = require('./test-functions')
 describe('Returning data from Database', function() {
   let testuser = createNewUser();
   before(function () {
-    return runServer();
+    return runServer(TEST_DATABASE_URL);
   });
   after(function () {
     return closeServer();

@@ -13,7 +13,7 @@ chai.use(chaiHttp);
 describe('Authentication', function() {
   let testuser = createNewUser();
   before(function () {
-    return runServer();
+    return runServer(TEST_DATABASE_URL);
   });
   after(function () {
     return closeServer();
