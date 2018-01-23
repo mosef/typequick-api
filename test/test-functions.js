@@ -7,7 +7,7 @@ mongoose.Promise = global.Promise;
 
 function seedDb() {
   console.info("seeding database");
-  const lesson = new Lesson({
+  const lesson = {
       chapter: {
         difficulty: ["Basics"],
         page: {
@@ -16,7 +16,8 @@ function seedDb() {
             " To make a div with a class simply type a period before the div's name. Exmaple: '.text-box' <div class='text-box'></div>"
         }
       }
-  })
+  }
+  return lesson;
 }
 
 function teardownDb() {
