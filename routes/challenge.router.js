@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/GET", passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Question.find({})
-      .then(lesson => {
+      .then(questions => {
         res.status(200).json({ questions });
       })
       .catch(err => {
