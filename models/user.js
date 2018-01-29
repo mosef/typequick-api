@@ -1,5 +1,9 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const {Lesson} = require('./lesson');
+const {Session} = require('./session');
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -15,7 +19,9 @@ const UserSchema = new mongoose.Schema({
   username: {
     type: String,
     default: ''
-  }
+  },
+  lessons: [{type: Schema.Types.ObjectId, ref:'Lesson'}],
+  sessions: [{type: Schema.Types.ObjectId, ref:'Session'}]
 });
 
 UserSchema.pre('save', function userPreSave(next) {
