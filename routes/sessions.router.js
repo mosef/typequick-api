@@ -1,9 +1,9 @@
-require("../auth/strategies")(passport);
 const express = require("express");
 const passport = require("passport");
 const { Question } = require("../models/question");
 const { Session } = require("../models/session");
 const router = express.Router();
+require("../auth/strategies")(passport);
 
 router.get("/GET", passport.authenticate("jwt", { session: false }),
   (req, res) => {
