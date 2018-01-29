@@ -103,12 +103,14 @@ describe('Returning data from Database', function() {
             algorithm: ['HS256']
           })
       })
+      const timestart = 100;
+      const timeEnd = 200;
         return chai
         .request(app)
         .post('/api/sessions/POST')
         .send({
-          startedAt: testUser.startedAt,
-          stoppedAt: testUser.stoppedAt,
+          startedAt: timestart,
+          stoppedAt: timeEnd,
           userId: testUser._id
         })
         .then(res => {
