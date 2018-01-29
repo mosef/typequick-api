@@ -16,7 +16,7 @@ router.route('/register')
             password: req.body.password,
             username: req.body.username,
         })
-        .then(() => res.status(201).send())
+        .then(() => res.status(201).json({ success: true, message: "successfully created new user." }).send())
         .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
     })
     .get(passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -31,7 +31,7 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
               generalMessage: 'Email or password is incorrect',
           });
       }
-      return foundResult;
+      return foundResult + res.json({message: `found user ${foundResult}`});
   })
   .then((foundUser) => {
       foundUser.comparePassword(req.body.password)

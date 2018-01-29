@@ -41,7 +41,6 @@ router.post("/POST", passport.authenticate("jwt", { session: false }),
         ]
       }
       let timeTaken = userData.map((data) => data.stoppedAt - data.startedAt);
-      console.log(timeTaken)
     }
     Session.create({
       startedAt: req.user.startedAt,
@@ -50,7 +49,7 @@ router.post("/POST", passport.authenticate("jwt", { session: false }),
       durationInMs: timeTaken,
       score: 'blank'
     })
-      .then(sessionSaved => res.status(201).json(savedSession))
+      .then(sessionSaved => res.status(201).json({message: "session was saved"}))
       .catch(err => {
         res.status(500).json({ error: "something went wrong" });
       });
