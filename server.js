@@ -8,7 +8,7 @@ const passport = require('passport');
 const { PORT, DATABASE_URL } = require('./config');
 const { router: userRouter } = require('./routes/users.router');
 const { router: lessonRouter } = require('./routes/lessons.router');
-const { router: challengeRouter } = require('./routes/challenge.router');
+const { router: sessionsRouter } = require('./routes/sessions.router');
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.use(bodyParser.json());
 //routes
 app.use('/api/users/', userRouter);
 app.use('/api/lessons/', lessonRouter);
-app.use('/api/challenge/', challengeRouter);
+app.use('/api/sessions/', sessionsRouter);
 
 app.use('*', (req, res) => {
   return res.status(404).json({ message: 'Not Found' });
