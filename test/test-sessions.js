@@ -107,9 +107,9 @@ describe('Returning data from Database', function() {
         .request(app)
         .post('/api/sessions/POST')
         .send({
-          startedAt: req.user.startedAt,
-          stoppedAt: req.body.stoppedAt,
-          userId: req.user.id
+          startedAt: testUser.startedAt,
+          stoppedAt: testUser.stoppedAt,
+          userId: testUser._id
         })
         .then(res => {
           const data = res.body;
