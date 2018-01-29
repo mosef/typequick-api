@@ -2,6 +2,8 @@ const express = require("express");
 const passport = require("passport");
 const { Question } = require("../models/question");
 const { Session } = require("../models/session");
+const { Lesson } = require("../models/lesson");
+
 const router = express.Router();
 require("../auth/strategies")(passport);
 
@@ -42,8 +44,8 @@ router.post("/POST", passport.authenticate("jwt", { session: false }),
       console.log(timeTaken)
     }
     Session.create({
-      startedAt: req.user.id,
-      stoppedAt: req.body.title,
+      startedAt: req.user.startedAt,
+      stoppedAt: req.body.stoppedAt,
       userId: req.user.id,
       durationInMs: timeTaken,
       score: 'blank'
