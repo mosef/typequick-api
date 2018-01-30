@@ -31,7 +31,7 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
               generalMessage: 'Email or password is incorrect',
           });
       }
-      return foundResult + res.json({message: `found user ${foundResult}`});
+      return foundResult;
   })
   .then((foundUser) => {
       foundUser.comparePassword(req.body.password)
