@@ -41,4 +41,14 @@ UserSchema.methods.comparePassword = function userComparePassword(password) {
   return bcrypt.compare(password, this.password);
 };
 
+UserSchema.methods.apiRepr = function() {
+  return {
+      _id: this._id,
+      email: this.email || '',
+      username: this.username || '',
+      lessons: this.lessons || '',
+      sessions: this.sessions || ''
+  };
+};
+
 module.exports = mongoose.model('User', UserSchema);

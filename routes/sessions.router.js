@@ -7,11 +7,12 @@ const { Lesson } = require("../models/lesson");
 const router = express.Router();
 require("../auth/strategies")(passport);
 
-router.get("/GET", passport.authenticate("jwt", { session: false }),
+router.post("/start", passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Question.find({})
       .then(questions => {
-        res.status(200).json({ questions });
+        const startedAt = Date.now();
+        res.status(200).json({ questions, startedAt });
       })
       .catch(err => {
         res.status(400).json({ error: "something went terribly wrong" });
@@ -19,7 +20,7 @@ router.get("/GET", passport.authenticate("jwt", { session: false }),
   }
 );
 
-router.post("/POST", passport.authenticate("jwt", { session: false }),
+router.post("/stop", passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const requiredFields = ["userId", "startedAt", "stoppedAt"];
     for (let i = 0; i < requiredFields.length; i++) {
