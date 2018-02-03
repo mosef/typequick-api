@@ -8,7 +8,7 @@ const sessionSchema = new mongoose.Schema({
   stoppedAt: { type:Number },
   durationInMs: { type:Number },
   userId: {type: Schema.Types.ObjectId, ref:'User'},
-  score: { type:Number }
+  score: { type:String }
 });
 
 const Session = mongoose.model("session", sessionSchema);

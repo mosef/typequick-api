@@ -20,7 +20,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  lessons: [{type: Schema.Types.ObjectId, ref:'Lesson'}],
+  lessons: [{
+    _id: false,
+    currentLesson: {type: Schema.Types.ObjectId, ref:'Lesson'}
+  }],
   sessions: [{type: Schema.Types.ObjectId, ref:'Session'}]
 });
 
@@ -39,16 +42,6 @@ UserSchema.pre('save', function userPreSave(next) {
 
 UserSchema.methods.comparePassword = function userComparePassword(password) {
   return bcrypt.compare(password, this.password);
-};
-
-UserSchema.methods.apiRepr = function() {
-  return {
-      _id: this._id,
-      email: this.email || '',
-      username: this.username || '',
-      lessons: this.lessons || '',
-      sessions: this.sessions || ''
-  };
 };
 
 module.exports = mongoose.model('User', UserSchema);

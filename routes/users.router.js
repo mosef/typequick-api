@@ -3,6 +3,7 @@ const passport = require('passport');
 const User  = require('../models/user');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const errorsParser = require('../middleware/errorsParser.middleware');
 const disableWithToken = require('../middleware/disableWithToken.middleware').disableWithToken;
 const requiredFields = require('../middleware/requiredFields.middleware');
 
@@ -16,11 +17,21 @@ router.route('/register')
             password: req.body.password,
             username: req.body.username,
         })
-        .then(() => res.status(201).json({ success: true, message: "successfully created new user." }).send())
-        .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
+    .then(() => {
+    User.findOne({ email: req.body.email })
+    .then((foundUser) => {
+    const tokenPayload = {
+        _id: foundUser._id,
+        email: foundUser.email,
+        username: foundUser.username,
+    };
+    const token = jwt.sign(tokenPayload, config.JWT_SECRET, {
+        expiresIn: config.JWT_EXPIRY,
+    });
+    return res.status(201).json({ token: `Bearer ${token}` });
     })
-    .get(passport.authenticate('jwt', { session: false }), (req, res) => {
-        res.status(200).json(req.user);
+    })
+    .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
 });
 
 router.post('/login', disableWithToken, requiredFields('email', 'password'), (req, res) => {
@@ -32,8 +43,8 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
           });
       }
       return foundResult;
-  })
-  .then((foundUser) => {
+    })
+    .then((foundUser) => {
       foundUser.comparePassword(req.body.password)
       .then((comparingResult) => {
           if (!comparingResult) {
@@ -51,19 +62,17 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
           });
           return res.json({ token: `Bearer ${token}` });
       });
-  })
-  .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
+    })
+    .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
 });
 
 router.post('/refresh', (req, res) => {
     User.findOne({ email: req.body.email })
   .then((foundResult) => {
-      if (!foundResult) {
-          return res.status(400).json({
-              generalMessage: 'No token found',
-          });
-      }
-      return foundResult;
+    if (!foundResult) {
+    return res.status(400).json({
+    generalMessage: 'No token found',})
+    } return foundResult;
   })
   .then((foundUser) => {
     const tokenPayload = {
@@ -78,5 +87,7 @@ router.post('/refresh', (req, res) => {
   })
   .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
 });
+
+//add get request to return session score data for the graph section
 
 module.exports = { router };
