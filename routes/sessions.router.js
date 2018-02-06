@@ -22,7 +22,7 @@ router.get("/", passport.authenticate("jwt", { session: false }),
     });
 })
 
-router.post("/stop", requiredFields('userId', 'startedAt', 'stoppedAt'), passport.authenticate("jwt", { session: false }),
+router.post("/", requiredFields('userId', 'startedAt', 'stoppedAt'), passport.authenticate("jwt", { session: false }),
 (req, res) => {
   let startedAt = req.body.startedAt;
   let stoppedAt = req.body.stoppedAt;
@@ -39,23 +39,26 @@ router.post("/stop", requiredFields('userId', 'startedAt', 'stoppedAt'), passpor
   .catch(report => {
     res.status(400).json(errorsParser.generateErrorResponse(report));
   })
-  .then(foundLesson => {
-    User.findById({_id: req.body.userId})
+  .then((createdSession) => {
+    User.findById({_id:req.body.userId})
+    .catch(report => {
+      res.status(400).json(errorsParser.generateErrorResponse(report));
+    })
+    .then((foundUser) => {
+      let found = foundUser.sessions.find((item)=> {
+        return (item.currentSession.toString()) == (createdSession._id.toString())
+      })
+      if(found) {
+        return res.status(300).json({ message: "Already exists in user collection" });
+      } else {
+        foundUser.sessions.push(createdSession._id)
+        foundUser.save();
+        return res.status(201).json({ message: "Added session to user collection" });
+      }
+    })
   })
   .catch(report => {
     res.status(400).json(errorsParser.generateErrorResponse(report));
-  })
-  .then((foundUser) => {
-    const found = foundUser.lessons.find((item)=> {
-      return (item.currentLesson.toString()) == (foundLesson._id.toString())
-    })
-    if(found) {
-      return res.status(300).json({ message: "Already exists in user collection" });
-    } else {
-      foundUser.lessons.push({currentLesson: foundLesson._id})
-      foundUser.save();
-      res.status(201).json({ message: "Added lesson to user collection" });
-    }
   })
 });
 // handle data on backend and send it to graph on front end

@@ -14,7 +14,6 @@ const app = express();
 
 mongoose.Promise = global.Promise;
 
-//logging
 app.use(morgan('common'));
 
 //CORS
