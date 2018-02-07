@@ -13,13 +13,13 @@ router.post("/title", requiredFields('userId', 'lessonTitle'), passport.authenti
   (req, res) => {
   Lesson.findOne({lessonTitle: req.body.lessonTitle})
     .catch(report => {
-      res.status(500).json(errorsParser.generateErrorResponse(report));
+      return res.status(500).json(errorsParser.generateErrorResponse(report));
     })
     .then(lesson => {
-      res.status(200).json({ lesson });
+      return res.status(200).json({ lesson });
     })
     .catch(report => {
-      res.status(401).json(errorsParser.generateErrorResponse(report));
+      return res.status(401).json(errorsParser.generateErrorResponse(report));
     });
   }
 );
