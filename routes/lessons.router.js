@@ -9,9 +9,12 @@ const requiredFields = require('../middleware/requiredFields.middleware');
 require("../auth/strategies")(passport);
 const router = express.Router();
 
-router.post("/", requiredFields('userId', 'lessonTitle'), passport.authenticate("jwt", { session: false }),
+router.post("/title", requiredFields('userId', 'lessonTitle'), passport.authenticate("jwt", { session: false }),
   (req, res) => {
   Lesson.findOne({lessonTitle: req.body.lessonTitle})
+    .catch(report => {
+      res.status(400).json(errorsParser.generateErrorResponse(report));
+    })
     .then(lesson => {
       res.status(200).json({ lesson });
     })
@@ -21,11 +24,17 @@ router.post("/", requiredFields('userId', 'lessonTitle'), passport.authenticate(
   }
 );
 
-router.post("/:id", requiredFields('userId', 'lessonId'), passport.authenticate("jwt", { session: false }),
+router.post("/", requiredFields('userId', 'lessonId'), passport.authenticate("jwt", { session: false }),
   (req, res) => {
   Lesson.findById({_id: req.body.lessonId})
+    .catch(report => {
+      res.status(400).json(errorsParser.generateErrorResponse(report));
+    })
     .then(foundLesson => {
       User.findById({_id: req.body.userId})
+      .catch(report => {
+        res.status(400).json(errorsParser.generateErrorResponse(report));
+      })
       .then((foundUser) => {
         const found = foundUser.lessons.find((item)=> {
           return (item.currentLesson.toString()) == (foundLesson._id.toString())
@@ -37,6 +46,9 @@ router.post("/:id", requiredFields('userId', 'lessonId'), passport.authenticate(
           foundUser.save();
           res.status(201).json({ message: "Added lesson to user collection" });
         }
+      })
+      .catch(report => {
+        res.status(400).json(errorsParser.generateErrorResponse(report));
       })
     })
     .catch(report => {

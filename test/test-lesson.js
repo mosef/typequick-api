@@ -27,7 +27,7 @@ describe('Returning data from Database', function() {
     it('Should reject unauthorized users', function() {
       return chai
       .request(app)
-      .get('/api/lessons/')
+      .get('/api/lessons/title')
       .then(() =>
         expect.fail(null, null, 'Request should fail')
       )
@@ -65,7 +65,7 @@ describe('Returning data from Database', function() {
       })
         return chai
         .request(app)
-        .get('/api/lessons/')
+        .get('/api/lessons/title')
         .then(res => {
           const data = res.body;
           expect(data).to.have.status(200);
