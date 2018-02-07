@@ -17,10 +17,10 @@ router.get("/", passport.authenticate("jwt", { session: false }),
       const startedAt = Date.now();
       return res.status(200).json({ questions, startedAt });
     })
-    .catch(err => {
-      res.status(400).json({ error: "something went terribly wrong" });
+    .catch(report => {
+      res.status(400).json(errorsParser.generateErrorResponse(report));
     });
-})
+});
 
 router.post("/", requiredFields('userId', 'startedAt', 'stoppedAt'), passport.authenticate("jwt", { session: false }),
 (req, res) => {
@@ -45,22 +45,15 @@ router.post("/", requiredFields('userId', 'startedAt', 'stoppedAt'), passport.au
       res.status(400).json(errorsParser.generateErrorResponse(report));
     })
     .then((foundUser) => {
-      let found = foundUser.sessions.find((item)=> {
-        return (item.currentSession.toString()) == (createdSession._id.toString())
-      })
-      if(found) {
-        return res.status(300).json({ message: "Already exists in user collection" });
-      } else {
-        foundUser.sessions.push(createdSession._id)
-        foundUser.save();
-        return res.status(201).json({ message: "Added session to user collection" });
-      }
+      foundUser.sessions.push(createdSession._id)
+      foundUser.scores.push({value: scoreTime, sessionId: createdSession._id})
+      foundUser.save();
+      return res.status(201).json({ message: "Session has been saved." });
     })
   })
   .catch(report => {
     res.status(400).json(errorsParser.generateErrorResponse(report));
   })
 });
-// handle data on backend and send it to graph on front end
 
 module.exports = { router };

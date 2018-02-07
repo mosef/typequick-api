@@ -88,6 +88,15 @@ router.post('/refresh', (req, res) => {
   .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
 });
 
-//add get request to return session score data for the graph section
+router.post("/scores", requiredFields('userId'), passport.authenticate("jwt", { session: false }),
+(req, res) => {
+  User.findById({_id:req.body.userId})
+  .catch(err => {
+    res.status(400).json({ error: "something went terribly wrong" });
+  })
+  .then((foundUser)=>{
+    return res.status(200).json({scores: foundUser.scores})
+  })
+})
 
 module.exports = { router };

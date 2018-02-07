@@ -24,12 +24,12 @@ describe('Returning data from Database', function() {
     return teardownDb();
   });
 
-  describe('/api/sessions/start & stop', function () {
+  describe('/api/sessions/', function () {
 
     it('Should reject unauthorized users', function() {
       return chai
       .request(app)
-      .post('/api/sessions/start')
+      .post('/api/sessions/')
       .then(() =>
         expect.fail(null, null, 'Request should fail')
       )
@@ -83,7 +83,7 @@ describe('Returning data from Database', function() {
             const timeEnd = 200;
             return chai
             .request(app)
-            .post('/api/sessions/stop')
+            .post('/api/sessions/')
             .set('Authorization', 'Bearer', + token)
             .send({
               startedAt: timestart,

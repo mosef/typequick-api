@@ -22,12 +22,12 @@ describe('Returning data from Database', function() {
     return teardownDb();
   });
 
-  describe('/api/lessons/GET', function () {
+  describe('/api/lessons/', function () {
 
     it('Should reject unauthorized users', function() {
       return chai
       .request(app)
-      .get('/api/lessons/GET')
+      .get('/api/lessons/')
       .then(() =>
         expect.fail(null, null, 'Request should fail')
       )
@@ -65,7 +65,7 @@ describe('Returning data from Database', function() {
       })
         return chai
         .request(app)
-        .get('/api/lessons/GET')
+        .get('/api/lessons/')
         .then(res => {
           const data = res.body;
           expect(data).to.have.status(200);

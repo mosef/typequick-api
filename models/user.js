@@ -24,7 +24,14 @@ const UserSchema = new mongoose.Schema({
     _id: false,
     currentLesson: {type: Schema.Types.ObjectId, ref:'Lesson'}
   }],
-  sessions: [{type: Schema.Types.ObjectId, ref:'Session'}]
+  sessions: [{
+    _id: false,
+    type: Schema.Types.ObjectId, ref:'Session'
+  }],
+  scores: [{
+    value:{ type:String }, 
+    sessionId:{ type:String }
+  }]
 });
 
 UserSchema.pre('save', function userPreSave(next) {
