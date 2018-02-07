@@ -18,27 +18,25 @@ router.route('/register')
             username: req.body.username,
         })
     .then(() => {
-    User.findOne({ email: req.body.email })
-    .then((foundUser) => {
-    const tokenPayload = {
-        _id: foundUser._id,
-        email: foundUser.email,
-        username: foundUser.username,
-    };
-    const token = jwt.sign(tokenPayload, config.JWT_SECRET, {
-        expiresIn: config.JWT_EXPIRY,
-    });
-    return res.status(201).json({ token: `Bearer ${token}` });
+        User.findOne({ email: req.body.email })
+        .then((foundUser) => {
+            const tokenPayload = {
+                _id: foundUser._id,
+                email: foundUser.email,
+                username: foundUser.username,
+            };
+            const token = jwt.sign(tokenPayload, config.JWT_SECRET, { expiresIn: config.JWT_EXPIRY,});
+            return res.status(201).json({ token: `Bearer ${token}` });
+        })
     })
-    })
-    .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
+    .catch(report => res.json(errorsParser.generateErrorResponse(report)));
 });
 
 router.post('/login', disableWithToken, requiredFields('email', 'password'), (req, res) => {
   User.findOne({ email: req.body.email })
   .then((foundResult) => {
       if (!foundResult) {
-          return res.status(400).json({
+          return res.status(401).json({
               generalMessage: 'Email or password is incorrect',
           });
       }
@@ -48,7 +46,7 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
       foundUser.comparePassword(req.body.password)
       .then((comparingResult) => {
           if (!comparingResult) {
-              return res.status(400).json({
+              return res.status(401).json({
                   generalMessage: 'Email or password is incorrect',
               });
           }
@@ -63,14 +61,14 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
           return res.json({ token: `Bearer ${token}` });
       });
     })
-    .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
+    .catch(report => res.status(401).json(errorsParser.generateErrorResponse(report)));
 });
 
 router.post('/refresh', (req, res) => {
     User.findOne({ email: req.body.email })
   .then((foundResult) => {
     if (!foundResult) {
-    return res.status(400).json({
+    return res.status(401).json({
     generalMessage: 'No token found',})
     } return foundResult;
   })
@@ -85,7 +83,7 @@ router.post('/refresh', (req, res) => {
     });
     return res.json({ token: `Bearer ${token}` });
   })
-  .catch(report => res.status(400).json(errorsParser.generateErrorResponse(report)));
+  .catch(report => res.status(401).json(errorsParser.generateErrorResponse(report)));
 });
 
 router.post("/scores", requiredFields('userId'), passport.authenticate("jwt", { session: false }),
@@ -95,7 +93,7 @@ router.post("/scores", requiredFields('userId'), passport.authenticate("jwt", { 
     return res.status(200).json({scores: foundUser.scores})
   })
   .catch(err => {
-    res.status(400).json({ error: "something went terribly wrong" });
+    res.status(401).json({ error: "something went terribly wrong" });
   })
 })
 

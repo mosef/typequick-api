@@ -57,7 +57,7 @@ describe('/api/users/login', function () {
           throw err;
         }
         const res= err.response;
-        expect(res).to.have.status(400)
+        expect(res).to.have.status(401)
       });
     });
     it('Should reject invalid passwords', function () {
@@ -73,7 +73,7 @@ describe('/api/users/login', function () {
             throw err;
           }
           const res = err.response;
-          expect(res).to.have.status(400);
+          expect(res).to.have.status(401);
         });
     });
     it('Should return vaild Auth Token', function () {
@@ -115,7 +115,7 @@ describe('/api/users/login', function () {
           throw err;
         }
         const res = err.response;
-        expect(res).to.have.status(400);
+        expect(res).to.have.status(401);
       });
     });
     it('Should reject invalid tokens', function () {
@@ -144,7 +144,7 @@ describe('/api/users/login', function () {
           throw err;
         }
         const res = err.response;
-        expect(res).to.have.status(400);
+        expect(res).to.have.status(401);
       });
     });
     it('Should reject expired tokens', function () {
@@ -174,7 +174,7 @@ describe('/api/users/login', function () {
           throw err;
         }
         const res = err.response;
-        expect(res).to.have.status(400);
+        expect(res).to.have.status(401);
       });
     });
     it('Should refresh auth token', function () {

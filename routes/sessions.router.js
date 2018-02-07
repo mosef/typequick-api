@@ -1,6 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const ms = require('ms');
+const jwtDecode = require('jwt-decode');
 const { Question } = require("../models/question");
 const { Session } = require("../models/session");
 const { Lesson } = require("../models/lesson");

@@ -2,6 +2,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const expect = chai.expect
 const jwt = require('jsonwebtoken');
+const jwtDecode = require('jwt-decode');
 const faker = require('faker');
 
 const { app, runServer, closeServer } = require('../server');
@@ -24,9 +25,9 @@ describe('Returning data from Database', function() {
     return teardownDb();
   });
 
-  describe('/api/sessions/', function () {
+  describe('Sessions Router', function () {
 
-    it('Should reject unauthorized users', function() {
+    it('Should reject requests with empty auth headers', function() {
       return chai
       .request(app)
       .post('/api/sessions/')
@@ -38,73 +39,35 @@ describe('Returning data from Database', function() {
           throw err;
         }
         const res = err.response;
-        expect(res).to.have.status(401);
+        expect(res).to.have.status(400);
       });
     });
 
     it('Should create new session and store it', function() {
-      let sampleUser = {
-        email: faker.internet.email(),
-        username: faker.name.title(),
-        password: faker.internet.password()
-      }
       return chai
+      .request(app)
+      .post('/api/users/register')
+      .send({email: "testemail", password: "aouhid1881", username: "testname"})
+      .then(res => {
+        let responseToken = res.body.token;
+        let token = responseToken.replace('Bearer', '');
+        let decoded = jwtDecode(token);
+        const tokenTest = {
+          responseToken,
+          token,
+          decoded
+        }
+        return tokenTest
+      })
+      .then((tokenTest) => {
+        return chai
         .request(app)
-        .post('/api/users/register')
-        .send(sampleUser)
-        .then(res => {
-          const token = jwt.sign({userId: sampleUser._id}, JWT_SECRET, { expiresIn: 10000 });
-          console.log(token)
-          return chai
-          .request(app)
-          .post('/api/users/login')
-          .set('Authorization', 'Bearer', + token)
-          .send({
-            email: sampleUser.email,
-            password: sampleUser.password
-          })
-          .then(res => {
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.an('object');
-            const token = res.body;
-            expect(token).to.be.an('object')
-            const payload = jwt.verify(token, JWT_SECRET, {
-              algorithm: ['HS256']
-            })
-          })
-          .catch(err => {
-            if(err instanceof chai.AssertionError) {
-              throw err;
-              console.log(err)
-            }
-            })
-          .then(() => {
-            const timestart = 75;
-            const timeEnd = 200;
-            return chai
-            .request(app)
-            .post('/api/sessions/')
-            .set('Authorization', 'Bearer', + token)
-            .send({
-              startedAt: timestart,
-              stoppedAt: timeEnd,
-              userId: sampleUser._id
-            })
-            .then((res) => {
-              expect(res).to.have.status(200);
-              expect(res).to.be.an('object');
-              expect(res).to.be.lengthOf(1);
-              expect(res.body.durationInMs).to.equal(125)  
-              })
-            .catch(err => {
-            if(err instanceof chai.AssertionError) {
-              throw err;
-            }
-            const res= err.response;
-            expect(res).to.have.status(401)
-            console.log(err)
-          });
-        })   
+        .post('/api/sessions/')
+        .set('Authorization', tokenTest.responseToken)
+        .send({ userId: tokenTest.decoded._id, startedAt: 1517981331125, stoppedAt: 1517982584178 })
+        .then((res) => {
+          expect(res).to.have.status(201)
+        })
       })
     })
   })

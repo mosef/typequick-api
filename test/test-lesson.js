@@ -1,12 +1,13 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const expect = chai.expect
+const jwtDecode = require('jwt-decode');
 
 const { app, runServer, closeServer } = require('../server');
 const { JWT_SECRET, TEST_DATABASE_URL } = require('../config');
 const { createNewUser, seedDb, teardownDb } = require('./test-functions')
 
-describe('Returning data from Database', function() {
+describe('Lessons Router', function() {
   let testuser = createNewUser();
   before(function () {
     return runServer(TEST_DATABASE_URL);
@@ -24,7 +25,7 @@ describe('Returning data from Database', function() {
 
   describe('/api/lessons/', function () {
 
-    it('Should reject unauthorized users', function() {
+    it('Should reject requests with empty auth headers', function() {
       return chai
       .request(app)
       .post('/api/lessons/title')
@@ -36,7 +37,7 @@ describe('Returning data from Database', function() {
           throw err;
         }
         const res = err.response;
-        expect(res).to.have.status(401);
+        expect(res).to.have.status(400);
       });
     });
 
@@ -62,10 +63,13 @@ describe('Returning data from Database', function() {
           const payload = jwt.verify(token, JWT_SECRET, {
             algorithm: ['HS256']
           })
-      })
+        })
         return chai
         .request(app)
         .post('/api/lessons/title')
+        .then(token => {
+          const decoded =jwt_decode(token);
+        })
         .send({
           userId: testUser._id,
           lessonTitle: "Learn Emmet"
@@ -75,7 +79,8 @@ describe('Returning data from Database', function() {
           expect(data).to.have.status(200);
           expect(data).to.be.an('object');
           expect(data).to.be.lengthOf(1);
-      }).catch(err => {
+        })
+        .catch(err => {
         if(err instanceof chai.AssertionError) {
           throw err;
         }

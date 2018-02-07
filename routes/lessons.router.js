@@ -13,7 +13,7 @@ router.post("/title", requiredFields('userId', 'lessonTitle'), passport.authenti
   (req, res) => {
   Lesson.findOne({lessonTitle: req.body.lessonTitle})
     .then(lesson => {
-      return res.status(200).json({ lesson });
+      res.status(200).json({ lesson });
     })
     .catch(report => {
       return res.status(401).json(errorsParser.generateErrorResponse(report));
