@@ -8,6 +8,7 @@ mongoose.Promise = global.Promise;
 function seedDb() {
   console.info("seeding database");
   const lesson = {
+    lessonTitle: "Learn Emmet",
       chapter: {
         difficulty: ["Basics"],
         page: {
