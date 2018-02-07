@@ -36,6 +36,7 @@ router.route('/register')
 
 router.post('/login', disableWithToken, requiredFields('email', 'password'), (req, res) => {
   User.findOne({ email: req.body.email })
+  .catch(error => res.status(400).json({generalMessage: 'Email or password is missing',}))
   .then((foundResult) => {
       if (!foundResult) {
           return res.status(400).json({
