@@ -36,14 +36,8 @@ router.post("/", requiredFields('userId', 'startedAt', 'stoppedAt'), passport.au
     durationInMs: timeTaken[0],
     score: scoreTime
   })
-  .catch(report => {
-    res.status(400).json(errorsParser.generateErrorResponse(report));
-  })
   .then((createdSession) => {
     User.findById({_id:req.body.userId})
-    .catch(report => {
-      res.status(400).json(errorsParser.generateErrorResponse(report));
-    })
     .then((foundUser) => {
       foundUser.sessions.push(createdSession._id)
       foundUser.scores.push({value: scoreTime, sessionId: createdSession._id})

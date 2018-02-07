@@ -36,7 +36,6 @@ router.route('/register')
 
 router.post('/login', disableWithToken, requiredFields('email', 'password'), (req, res) => {
   User.findOne({ email: req.body.email })
-  .catch(error => res.status(400).json({generalMessage: 'Email or password is missing',}))
   .then((foundResult) => {
       if (!foundResult) {
           return res.status(400).json({
@@ -92,11 +91,11 @@ router.post('/refresh', (req, res) => {
 router.post("/scores", requiredFields('userId'), passport.authenticate("jwt", { session: false }),
 (req, res) => {
   User.findById({_id:req.body.userId})
-  .catch(err => {
-    res.status(400).json({ error: "something went terribly wrong" });
-  })
   .then((foundUser)=>{
     return res.status(200).json({scores: foundUser.scores})
+  })
+  .catch(err => {
+    res.status(400).json({ error: "something went terribly wrong" });
   })
 })
 

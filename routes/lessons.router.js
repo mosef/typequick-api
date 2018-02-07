@@ -12,9 +12,6 @@ const router = express.Router();
 router.post("/title", requiredFields('userId', 'lessonTitle'), passport.authenticate("jwt", { session: false }),
   (req, res) => {
   Lesson.findOne({lessonTitle: req.body.lessonTitle})
-    .catch(report => {
-      return res.status(500).json(errorsParser.generateErrorResponse(report));
-    })
     .then(lesson => {
       return res.status(200).json({ lesson });
     })
@@ -27,14 +24,8 @@ router.post("/title", requiredFields('userId', 'lessonTitle'), passport.authenti
 router.post("/", requiredFields('userId', 'lessonId'), passport.authenticate("jwt", { session: false }),
   (req, res) => {
   Lesson.findById({_id: req.body.lessonId})
-    .catch(report => {
-      res.status(400).json(errorsParser.generateErrorResponse(report));
-    })
     .then(foundLesson => {
       User.findById({_id: req.body.userId})
-      .catch(report => {
-        res.status(400).json(errorsParser.generateErrorResponse(report));
-      })
       .then((foundUser) => {
         const found = foundUser.lessons.find((item)=> {
           return (item.currentLesson.toString()) == (foundLesson._id.toString())
@@ -46,9 +37,6 @@ router.post("/", requiredFields('userId', 'lessonId'), passport.authenticate("jw
           foundUser.save();
           res.status(201).json({ message: "Added lesson to user collection" });
         }
-      })
-      .catch(report => {
-        res.status(400).json(errorsParser.generateErrorResponse(report));
       })
     })
     .catch(report => {
