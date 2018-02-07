@@ -19,7 +19,7 @@ router.post("/title", requiredFields('userId', 'lessonTitle'), passport.authenti
       res.status(200).json({ lesson });
     })
     .catch(report => {
-      res.status(403).json(errorsParser.generateErrorResponse(report));
+      res.status(401).json(errorsParser.generateErrorResponse(report));
     });
   }
 );
