@@ -36,11 +36,15 @@ describe('Authentication', () => {
 
     it('Should reject invalid email addresses', () => chai
       .request(app)
-      .post('/api/users/login')
-      .send({
-        email: 'wrongmail',
-        password: testuser.password,
-      })
+      .post('/api/users/register')
+      .send({ email: 'testemail', password: 'aouhid1881', username: 'testname' })
+      .then(() => chai
+        .request(app)
+        .post('/api/users/login')
+        .send({
+          email: 'wrongmail',
+          password: 'aouhid1881',
+        }))
       .then(() =>
         expect.fail(null, null, 'Request should fail'))
       .catch((err) => {
@@ -70,13 +74,8 @@ describe('Authentication', () => {
       .post('/api/users/register')
       .send({ email: 'testemail', password: 'aouhid1881', username: 'testname' })
       .then((res) => {
-        const responseToken = res.body.token;
         expect(res).to.have.status(201);
         expect(res.body).to.be.an('object');
-        const payload = jwt.verify(responseToken, JWT_SECRET, {
-          algorithm: ['HS256'],
-        });
-        expect(payload).to.be.an('object');
       })
       .catch((err) => {
         if (err instanceof chai.AssertionError) {
@@ -84,7 +83,6 @@ describe('Authentication', () => {
         }
         const res = err.response;
         expect(res).to.have.status(401);
-        console.log(res);
       }));
 
     describe('api/users/refresh', () => {

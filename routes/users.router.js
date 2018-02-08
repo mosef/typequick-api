@@ -50,7 +50,7 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
         .then((comparingResult) => {
           if (!comparingResult) {
             return res.status(401).json({
-              generalMessage: 'Email or password is incorrect',
+              generalMessage: 'Password is incorrect',
             });
           }
           const tokenPayload = {
