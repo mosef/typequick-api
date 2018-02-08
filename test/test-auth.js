@@ -71,7 +71,7 @@ describe('Authentication', () => {
       .send({ email: 'testemail', password: 'aouhid1881', username: 'testname' })
       .then((res) => {
         const responseToken = res.body.token;
-        expect(res).to.have.status(200);
+        expect(res).to.have.status(201);
         expect(res.body).to.be.an('object');
         const payload = jwt.verify(responseToken, JWT_SECRET, {
           algorithm: ['HS256'],
