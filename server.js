@@ -16,8 +16,8 @@ mongoose.Promise = global.Promise;
 
 app.use(morgan('common'));
 
-//CORS
-app.use(function (req, res, next) {
+// CORS
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
@@ -27,51 +27,45 @@ app.use(function (req, res, next) {
   next();
 });
 
-//parser
+// parser
 app.use(bodyParser.json());
 
-//routes
+// routes
 app.use('/api/users/', userRouter);
 app.use('/api/lessons/', lessonRouter);
 app.use('/api/sessions/', sessionsRouter);
 
-app.use('*', (req, res) => {
-  return res.status(404).json({ message: 'Not Found' });
-});
+app.use('*', (req, res) => res.status(404).json({ message: 'Not Found' }));
 
 let server;
 
 function runServer() {
   return new Promise((resolve, reject) => {
-    mongoose.connect(DATABASE_URL, { useMongoClient: true }, err => {
+    mongoose.connect(DATABASE_URL, { useMongoClient: true }, (err) => {
       if (err) {
         return reject(err);
       }
       server = app
         .listen(PORT, () => {
-          console.log(`Your app is listening on port ${PORT}`);
           resolve();
         })
-        .on('error', err => {
+        .on('error', () => {
           mongoose.disconnect();
-          reject(err);
+          return reject(err);
         });
     });
   });
 }
 
 function closeServer() {
-  return mongoose.disconnect().then(() => {
-    return new Promise((resolve, reject) => {
-      console.log('Closing server');
-      server.close(err => {
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      });
+  return mongoose.disconnect().then(() => new Promise((resolve, reject) => {
+    server.close((err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
     });
-  });
+  }));
 }
 
 if (require.main === module) {

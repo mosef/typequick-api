@@ -1,74 +1,57 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const expect = chai.expect
+
+const expect = chai.expect;
 const jwt = require('jsonwebtoken');
 const jwtDecode = require('jwt-decode');
-const faker = require('faker');
 
 const { app, runServer, closeServer } = require('../server');
 const { JWT_SECRET, TEST_DATABASE_URL } = require('../config');
-const { createNewUser, seedDb, teardownDb } = require('./test-functions')
+const { seedDb, teardownDb } = require('./test-functions');
 
-describe('Returning data from Database', function() {
-  let testuser = createNewUser();
-  before(function () {
-    return runServer(TEST_DATABASE_URL);
-  });
-  after(function () {
-    return closeServer();
-  });
+describe('Returning data from Database', () => {
+  before(() => runServer(TEST_DATABASE_URL));
+  after(() => closeServer());
 
-  beforeEach(function () {
-    return seedDb();
-  });
-  afterEach(function () {
-    return teardownDb();
-  });
+  beforeEach(() => seedDb());
+  afterEach(() => teardownDb());
 
-  describe('Sessions Router', function () {
-
-    it('Should reject requests with empty auth headers', function() {
-      return chai
+  describe('Sessions Router', () => {
+    it('Should reject requests with empty auth headers', () => chai
       .request(app)
       .post('/api/sessions/')
       .then(() =>
-        expect.fail(null, null, 'Request should fail')
-      )
-      .catch(err => {
-        if(err instanceof chai.AssertionError) {
+        expect.fail(null, null, 'Request should fail'))
+      .catch((err) => {
+        if (err instanceof chai.AssertionError) {
           throw err;
         }
         const res = err.response;
         expect(res).to.have.status(400);
-      });
-    });
+      }));
 
-    it('Should create new session and store it', function() {
-      return chai
+    it('Should create new session and store it', () => chai
       .request(app)
       .post('/api/users/register')
-      .send({email: "testemail", password: "aouhid1881", username: "testname"})
-      .then(res => {
-        let responseToken = res.body.token;
-        let token = responseToken.replace('Bearer', '');
-        let decoded = jwtDecode(token);
+      .send({ email: 'testemail', password: 'aouhid1881', username: 'testname' })
+      .then((res) => {
+        const responseToken = res.body.token;
+        const token = responseToken.replace('Bearer', '');
+        const decoded = jwtDecode(token);
         const tokenTest = {
           responseToken,
           token,
-          decoded
-        }
-        return tokenTest
+          decoded,
+        };
+        return tokenTest;
       })
-      .then((tokenTest) => {
-        return chai
+      .then(tokenTest => chai
         .request(app)
         .post('/api/sessions/')
         .set('Authorization', tokenTest.responseToken)
         .send({ userId: tokenTest.decoded._id, startedAt: 1517981331125, stoppedAt: 1517982584178 })
         .then((res) => {
-          expect(res).to.have.status(201)
-        })
-      })
-    })
-  })
-})
+          expect(res).to.have.status(201);
+        })));
+  });
+});

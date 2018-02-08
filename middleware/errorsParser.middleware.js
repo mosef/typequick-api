@@ -4,8 +4,8 @@ module.exports = {
   generateErrorResponse: (report) => {
     if (report.errors && report._message) {
       return {
-          generalMessage: report._message,
-          messages: parseErrors(report.errors),
+        generalMessage: report._message,
+        messages: parseErrors(report.errors),
       };
     }
     return {
