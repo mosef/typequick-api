@@ -45,25 +45,25 @@ router.post('/login', disableWithToken, requiredFields('email', 'password'), (re
       }
       return foundResult;
     })
-    // .then((foundUser) => {
-    //   foundUser.comparePassword(req.body.password)
-    //     .then((comparingResult) => {
-    //       if (!comparingResult) {
-    //         return res.status(401).json({
-    //           generalMessage: 'Password is incorrect',
-    //         });
-    //       }
-    //       const tokenPayload = {
-    //         _id: foundUser._id,
-    //         email: foundUser.email,
-    //         username: foundUser.username,
-    //       };
-    //       const token = jwt.sign(tokenPayload, config.JWT_SECRET, {
-    //         expiresIn: config.JWT_EXPIRY,
-    //       });
-    //       return res.json({ token: `Bearer ${token}` });
-    //     });
-    // })
+    .then((foundUser) => {
+      foundUser.comparePassword(req.body.password)
+        .then((comparingResult) => {
+          if (!comparingResult) {
+            return res.status(401).json({
+              generalMessage: 'Password is incorrect',
+            });
+          }
+          const tokenPayload = {
+            _id: foundUser._id,
+            email: foundUser.email,
+            username: foundUser.username,
+          };
+          const token = jwt.sign(tokenPayload, config.JWT_SECRET, {
+            expiresIn: config.JWT_EXPIRY,
+          });
+          return res.json({ token: `Bearer ${token}` });
+        });
+    })
     .catch(report => res.json(errorsParser.generateErrorResponse(report)));
 });
 
