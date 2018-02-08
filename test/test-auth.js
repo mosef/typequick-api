@@ -84,6 +84,7 @@ describe('Authentication', () => {
         }
         const res = err.response;
         expect(res).to.have.status(401);
+        console.log(res);
       }));
 
     describe('api/users/refresh', () => {
