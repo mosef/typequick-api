@@ -2,11 +2,10 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 
 const expect = chai.expect;
-const jwt = require('jsonwebtoken');
 const jwtDecode = require('jwt-decode');
 
 const { app, runServer, closeServer } = require('../server');
-const { JWT_SECRET, TEST_DATABASE_URL } = require('../config');
+const { TEST_DATABASE_URL } = require('../config');
 const { seedDb, teardownDb } = require('./test-functions');
 
 describe('Returning data from Database', () => {

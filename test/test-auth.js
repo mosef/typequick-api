@@ -1,6 +1,7 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const jwt = require('jsonwebtoken');
+const jwtDecode = require('jwt-decode');
 
 const expect = chai.expect;
 
@@ -32,6 +33,7 @@ describe('Authentication', () => {
         const res = err.response;
         expect(res).to.have.status(400);
       }));
+
     it('Should reject invalid email addresses', () => chai
       .request(app)
       .post('/api/users/login')
@@ -48,6 +50,7 @@ describe('Authentication', () => {
         const res = err.response;
         expect(res).to.have.status(401);
       }));
+
     it('Should reject invalid passwords', () => chai
       .request(app)
       .post('/api/users/login')
@@ -61,120 +64,114 @@ describe('Authentication', () => {
         const res = err.response;
         expect(res).to.have.status(401);
       }));
+
     it('Should return vaild Auth Token', () => chai
       .request(app)
       .post('/api/users/register')
-      .send(testuser)
-      .then(() => {
-        const token = jwt.sign({ userId: testUser._id }, JWT_SECRET, { expiresIn: 10000 });
+      .send({ email: 'testemail', password: 'aouhid1881', username: 'testname' })
+      .then((res) => {
+        const responseToken = res.body.token;
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an('object');
+        const payload = jwt.verify(responseToken, JWT_SECRET, {
+          algorithm: ['HS256'],
+        });
+        expect(payload).to.be.an('object');
+      })
+      .catch(err => err.json({ message: 'something went wrong' })));
+
+    describe('api/users/refresh', () => {
+      it('Should reject empty credentials', () => chai
+        .request(app)
+        .post('/api/users/refresh')
+        .then(() =>
+          expect.fail(null, null, 'Request should fail'))
+        .catch((err) => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(401);
+        }));
+
+      it('Should reject invalid tokens', () => {
+        const token = jwt.sign(
+          {
+            email: testuser.email,
+            password: testuser.password,
+            username: testuser.username,
+          },
+          'invalidSecret',
+          {
+            algorithm: 'HS256',
+            expiresIn: '7d',
+          },
+        );
+
         return chai
           .request(app)
-          .post('/api/users/login')
-          .send({
-            email: testuser.email,
-            password: testuser.password,
-          })
-          .then((res) => {
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.an('object');
-            const responseToken = res.body.authToken;
-            expect(token).to.be.a('string');
-            const payload = jwt.verify(responseToken, JWT_SECRET, {
-              algorithm: ['HS256'],
-            });
+          .post('/api/users/refresh')
+          .set('Authorization', `Bearer ${token}`)
+          .then(() =>
+            expect.fail(null, null, 'Request should fail'))
+          .catch((err) => {
+            if (err instanceof chai.AssertionError) {
+              throw err;
+            }
+            const res = err.response;
+            expect(res).to.have.status(401);
           });
-      }));
-  });
+      });
 
-  describe('api/users/refresh', () => {
-    it('Should reject empty credentials', () => chai
-      .request(app)
-      .post('/api/users/refresh')
-      .then(() =>
-        expect.fail(null, null, 'Request should fail'))
-      .catch((err) => {
-        if (err instanceof chai.AssertionError) {
-          throw err;
-        }
-        const res = err.response;
-        expect(res).to.have.status(401);
-      }));
-    it('Should reject invalid tokens', () => {
-      const token = jwt.sign(
-        {
-          email: testuser.email,
-          password: testuser.password,
-          username: testuser.username,
-        },
-        'invalidSecret',
-        {
-          algorithm: 'HS256',
-          expiresIn: '7d',
-        },
-      );
-
-      return chai
-        .request(app)
-        .post('/api/users/refresh')
-        .set('Authorization', `Bearer ${token}`)
-        .then(() =>
-          expect.fail(null, null, 'Request should fail'))
-        .catch((err) => {
-          if (err instanceof chai.AssertionError) {
-            throw err;
-          }
-          const res = err.response;
-          expect(res).to.have.status(401);
-        });
-    });
-    it('Should reject expired tokens', () => {
-      const token = jwt.sign(
-        {
-          user: {
-            email: testuser.email,
-            password: testuser.password,
+      it('Should reject expired tokens', () => {
+        const token = jwt.sign(
+          {
+            user: {
+              email: testuser.email,
+              password: testuser.password,
+            },
+            exp: Math.floor(Date.now() / 1000) - 10,
           },
-          exp: Math.floor(Date.now() / 1000) - 10,
-        },
-        JWT_SECRET,
-        {
-          algorithm: 'HS256',
-          subject: testuser.email,
-        },
-      );
-      return chai
-        .request(app)
-        .post('/api/users/refresh')
-        .set('authorization', `Bearer ${token}`)
-        .then(() =>
-          expect.fail(null, null, 'Request should fail'))
-        .catch((err) => {
-          if (err instanceof chai.AssertionError) {
-            throw err;
-          }
-          const res = err.response;
-          expect(res).to.have.status(401);
-        });
-    });
-    it('Should refresh auth token', () => {
-      return chai
+          JWT_SECRET,
+          {
+            algorithm: 'HS256',
+            subject: testuser.email,
+          },
+        );
+        return chai
+          .request(app)
+          .post('/api/users/refresh')
+          .set('authorization', `Bearer ${token}`)
+          .then(() =>
+            expect.fail(null, null, 'Request should fail'))
+          .catch((err) => {
+            if (err instanceof chai.AssertionError) {
+              throw err;
+            }
+            const res = err.response;
+            expect(res).to.have.status(401);
+          });
+      });
+
+      it('Should refresh auth token', () => chai
         .request(app)
         .post('/api/users/register')
-        .send(testuser)
-        .then();
-      const token = jwt.sign({ userId: testUser._id }, JWT_SECRET, { expiresIn: 10000 });
-      return chai
-        .request(app)
-        .post('/api/users/login')
-        .send({
-          email: testuser.email,
-          password: testuser.password,
+        .send({ email: 'testemail', password: 'aouhid1881', username: 'testname' })
+        .then((res) => {
+          const responseToken = res.body.token;
+          const token = responseToken.replace('Bearer', '');
+          const decoded = jwtDecode(token);
+          const tokenTest = {
+            responseToken,
+            token,
+            decoded,
+          };
+          return tokenTest;
         })
-        .then();
-      return chai
-        .request(app)
-        .post('/api/users/refresh')
-        .set('authorization', `Bearer ${token}`)
+        .then(tokenTest => chai
+          .request(app)
+          .post('/api/users/refresh')
+          .set('authorization', tokenTest.responseToken))
         .then((res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an('object');
@@ -183,8 +180,9 @@ describe('Authentication', () => {
           const payload = jwt.verify(token, JWT_SECRET, {
             algorithm: ['HS256'],
           });
-        });
+          expect(payload).to.be.an('object');
+        })
+        .catch(err => err.json({ msg: 'err' })));
     });
   });
 });
-
