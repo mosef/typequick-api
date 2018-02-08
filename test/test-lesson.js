@@ -62,7 +62,7 @@ describe('Lessons Router', () => {
           throw err;
         }
         const res = err.response;
-        expect(res).to.have.status(400);
+        expect(res).to.have.status(401);
       }));
   });
 });

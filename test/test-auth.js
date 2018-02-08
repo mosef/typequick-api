@@ -78,7 +78,13 @@ describe('Authentication', () => {
         });
         expect(payload).to.be.an('object');
       })
-      .catch(err => err.json({ message: 'something went wrong' })));
+      .catch((err) => {
+        if (err instanceof chai.AssertionError) {
+          throw err;
+        }
+        const res = err.response;
+        expect(res).to.have.status(401);
+      }));
 
     describe('api/users/refresh', () => {
       it('Should reject empty credentials', () => chai
@@ -182,7 +188,13 @@ describe('Authentication', () => {
           });
           expect(payload).to.be.an('object');
         })
-        .catch(err => err.json({ msg: 'err' })));
+        .catch((err) => {
+          if (err instanceof chai.AssertionError) {
+            throw err;
+          }
+          const res = err.response;
+          expect(res).to.have.status(401);
+        }));
     });
   });
 });
