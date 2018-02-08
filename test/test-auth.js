@@ -116,6 +116,7 @@ describe('Authentication', () => {
         return chai
           .request(app)
           .post('/api/users/refresh')
+          .send({ email: 'testemail' })
           .set('Authorization', `Bearer ${token}`)
           .then(() =>
             expect.fail(null, null, 'Request should fail'))
@@ -146,6 +147,7 @@ describe('Authentication', () => {
         return chai
           .request(app)
           .post('/api/users/refresh')
+          .send({ email: 'testemail' })
           .set('authorization', `Bearer ${token}`)
           .then(() =>
             expect.fail(null, null, 'Request should fail'))
@@ -176,16 +178,13 @@ describe('Authentication', () => {
         .then(tokenTest => chai
           .request(app)
           .post('/api/users/refresh')
+          .send({ email: 'testemail' })
           .set('authorization', tokenTest.responseToken))
         .then((res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an('object');
           const token = res.body.token;
           expect(token).to.be.a('string');
-          const payload = jwt.verify(token, JWT_SECRET, {
-            algorithm: ['HS256'],
-          });
-          expect(payload).to.be.an('object');
         })
         .catch((err) => {
           if (err instanceof chai.AssertionError) {
