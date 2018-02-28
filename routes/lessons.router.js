@@ -3,8 +3,6 @@ const passport = require('passport');
 const { Lesson } = require('../models/lesson');
 const User = require('../models/user');
 const errorsParser = require('../middleware/errorsParser.middleware');
-const disableWithToken = require('../middleware/disableWithToken.middleware')
-  .disableWithToken;
 const requiredFields = require('../middleware/requiredFields.middleware');
 
 require('../auth/strategies')(passport);
@@ -12,7 +10,7 @@ require('../auth/strategies')(passport);
 const router = express.Router();
 
 router.post(
-  '/title', disableWithToken, requiredFields('userId', 'lessonTitle'), passport.authenticate('jwt', { session: false }),
+  '/title', requiredFields('userId', 'lessonTitle'), passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Lesson.findOne({ lessonTitle: req.body.lessonTitle })
       .then((lesson) => {
@@ -24,7 +22,7 @@ router.post(
 );
 
 router.post(
-  '/', disableWithToken, requiredFields('userId', 'lessonId'), passport.authenticate('jwt', { session: false }),
+  '/', requiredFields('userId', 'lessonId'), passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Lesson.findById({ _id: req.body.lessonId })
       .then((foundLesson) => {
