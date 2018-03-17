@@ -6,9 +6,9 @@ const lessonSchema = new mongoose.Schema({
     difficulty: ['Basics', 'Advanced', 'Expert'],
     page: {
       title: { type: String },
-      content: [{
-        paragraph: { type: String },
-      }],
+      content: {
+        paragraph: [{ type: String }],
+      },
     },
   },
 });
